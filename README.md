@@ -21,6 +21,7 @@ $ pipenv install
 $ bash setup.sh
 $ pipenv shell
 $ python process.py --reduce_glove True --process True
+# generate R-net-1/dictionary.txt R-net-1/data/
 ```
 
 # Training / Testing / Debugging / Interactive Demo

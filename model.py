@@ -216,7 +216,8 @@ class Model(object):
         tf.summary.scalar("Exact_Match",self.EM)
         tf.summary.scalar('learning_rate', Params.opt_arg[Params.optimizer]['learning_rate'])
         self.merged = tf.summary.merge_all()
-
+        
+# 仅仅build model,不做训练或测试
 def debug():
     model = Model(is_training = False)
     print("Built model")
@@ -238,7 +239,7 @@ def test():
             F1 /= float(model.num_batch * Params.batch_size)
             EM /= float(model.num_batch * Params.batch_size)
             print("Exact_match: {}\nF1_score: {}".format(EM,F1))
-
+# for training
 def main():
     model = Model(is_training = True); print("Built model")
     dict_ = pickle.load(open(Params.data_dir + "dictionary.pkl","r"))
@@ -262,7 +263,7 @@ def main():
                 for step in tqdm(range(model.num_batch), total = model.num_batch, ncols=70, leave=False, unit='b'):
                     sess.run(model.train_op)
                     if step % Params.save_steps == 0:
-                        gs = sess.run(model.global_step)
+                        gs = sess.run(model.global_step) # int
                         sv.saver.save(sess, Params.logdir + '/model_epoch_%d_step_%d'%(gs//model.num_batch, gs%model.num_batch))
                         sample = np.random.choice(dev_ind, Params.batch_size)
                         feed_dict = {data: devdata[i][sample] for i,data in enumerate(model.data)}
@@ -272,7 +273,7 @@ def main():
                             f1, em = f1_and_EM(index[batch], devdata[8][sample][batch], devdata[0][sample][batch], dict_)
                             F1 += f1
                             EM += em
-                        F1 /= float(Params.batch_size)
+                        F1 /= float(Params.batch_size) # 一个batch的平均值
                         EM /= float(Params.batch_size)
                         sess.run(model.metric_assign,{model.F1_placeholder: F1, model.EM_placeholder: EM, model.dev_loss_placeholder: dev_loss})
                         print("\nDev_loss: {}\nDev_Exact_match: {}\nDev_F1_score: {}".format(dev_loss,EM,F1))
